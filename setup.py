@@ -22,7 +22,7 @@ setup(
     test_suite='test_flask_zipkin',
     install_requires=[
         'Flask',
-        'py_zipkin>=0.4.0',
-        'requests>=2.11.1',
+        'py_zipkin>=0.18.3',
+        'requests>=2.12.0',
         ]
 )
