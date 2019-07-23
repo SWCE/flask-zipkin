@@ -13,8 +13,8 @@ setup(
     version=__version__,
     url='',
     license='BSD',
-    author='killpanda',
-    author_email='angus@killpanda.de',
+    author='lchayoun',
+    author_email='lchayoun@gmail.com',
     description='An zipkin extension for Flask based on py_zipkin.',
     py_modules=['flask_zipkin'],
     zip_safe=False,
@@ -22,7 +22,7 @@ setup(
     test_suite='test_flask_zipkin',
     install_requires=[
         'Flask',
-        'py_zipkin=>=0.4.0',
+        'py_zipkin>=0.4.0',
         'requests>=2.11.1',
         ]
 )
