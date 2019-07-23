@@ -26,9 +26,10 @@ class Zipkin(object):
             random.choice(
                 string.digits) for i in range(16))
 
-    def __init__(self, app=None, sample_rate=100, timeout=1):
+    def __init__(self, app=None, sample_rate=100, timeout=1, use_128bit_trace_id=True):
         self._exempt_views = set()
         self._sample_rate = sample_rate
+        self._use_128bit_trace_id = use_128bit_trace_id
         if app is not None:
             self.init_app(app)
         self._transport_handler = None
@@ -40,7 +41,6 @@ class Zipkin(object):
 
     def default_handler(self, encoded_span):
         try:
-            #body = str.encode('\x0c\x00\x00\x00\x01') + encoded_span
             return requests.post(
                 self.app.config.get('ZIPKIN_DSN'),
                 data=encoded_span,
@@ -102,7 +102,8 @@ class Zipkin(object):
             span_name='{0}.{1}'.format(request.endpoint, request.method),
             transport_handler=handler,
             sample_rate=self._sample_rate,
-            zipkin_attrs=zipkin_attrs
+            zipkin_attrs=zipkin_attrs,
+            use_128bit_trace_id=self._use_128bit_trace_id
         )
         g._zipkin_span = span
         g._zipkin_span.start()
