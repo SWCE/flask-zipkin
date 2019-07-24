@@ -8,7 +8,7 @@ from flask import _app_ctx_stack
 from flask import current_app
 from flask import g
 from flask import request
-from py_zipkin import zipkin
+from py_zipkin import zipkin, util
 
 
 __version_info__ = ('0', '0', '4')
@@ -20,11 +20,6 @@ __all__ = ['Zipkin']
 
 
 class Zipkin(object):
-
-    def _gen_random_id(self):
-        return ''.join(
-            random.choice(
-                string.digits) for i in range(16))
 
     def __init__(self, app=None, sample_rate=100, timeout=1, use_128bit_trace_id=True):
         self._exempt_views = set()
@@ -82,14 +77,14 @@ class Zipkin(object):
         if not self._should_use_token(_app_ctx_stack.top._view_func):
             return
         headers = request.headers
-        trace_id = headers.get('X-B3-TraceId') or self._gen_random_id()
+        trace_id = headers.get('X-B3-TraceId') or self.generate_new_trace()
         parent_span_id = headers.get('X-B3-ParentSpanId')
         is_sampled = str(headers.get('X-B3-Sampled') or '0') == '1'
         flags = headers.get('X-B3-Flags')
 
         zipkin_attrs = zipkin.ZipkinAttrs(
             trace_id=trace_id,
-            span_id=self._gen_random_id(),
+            span_id=self.generate_new_trace(),
             parent_span_id=parent_span_id,
             flags=flags,
             is_sampled=is_sampled,
@@ -107,6 +102,11 @@ class Zipkin(object):
         )
         g._zipkin_span = span
         g._zipkin_span.start()
+
+    def generate_new_trace(self):
+        if self._use_128bit_trace_id == True:
+            return util.generate_random_128bit_string()
+        return util.generate_random_64bit_string()
 
     def exempt(self, view):
         view_location = '{0}.{1}'.format(view.__module__, view.__name__)
